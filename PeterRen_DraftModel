@@ -2,6 +2,7 @@ import io
 from google.cloud import texttospeech, speech
 from playsound import playsound
 import speech_recognition as sr
+import simpleaudio as sa
 
 import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/yuxinren/OpenHomeProject/my-google-cloud.json"
@@ -9,6 +10,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/yuxinren/OpenHomeProject/m
 
 recognizer = sr.Recognizer()
 mic = sr.Microphone()
+
 
 def listen_for_wake_word(recognizer, microphone, wake_word):
     with microphone as source:
@@ -57,7 +59,7 @@ voice = texttospeech.VoiceSelectionParams(
 )
 
 audio_config = texttospeech.AudioConfig(
-    audio_encoding=texttospeech.AudioEncoding.MP3
+    audio_encoding=texttospeech.AudioEncoding.LINEAR16
 )
 
 response = client.synthesize_speech(
@@ -66,11 +68,13 @@ response = client.synthesize_speech(
     audio_config=audio_config
 )
 
-# Save the response to an MP3 file
-filename = "outputVoice.mp3"
+# Save the response to a WAV file
+filename = "outputVoice.wav"  # Changed file extension to .wav
 with open(filename, "wb") as out:
     out.write(response.audio_content)
-    print("Audio content written to file 'output.mp3'")
+    print("Audio content written to file 'outputVoice.wav'")
 
-# Play the saved MP3 file
-playsound(filename)
+# Play the saved WAV file using simpleaudio
+wave_obj = sa.WaveObject.from_wave_file(filename)
+play_obj = wave_obj.play()
+play_obj.wait_done()  # Wait for playback to finish
