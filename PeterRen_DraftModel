@@ -67,7 +67,7 @@ response = client.synthesize_speech(
 )
 
 # Save the response to an MP3 file
-filename = "output.mp3"
+filename = "outputVoice.mp3"
 with open(filename, "wb") as out:
     out.write(response.audio_content)
     print("Audio content written to file 'output.mp3'")
