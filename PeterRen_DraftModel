@@ -1,0 +1,76 @@
+import io
+from google.cloud import texttospeech, speech
+from playsound import playsound
+import speech_recognition as sr
+
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/users/yuxinren/openhome/my-google-cloud.json"
+
+
+recognizer = sr.Recognizer()
+mic = sr.Microphone()
+
+def listen_for_wake_word(recognizer, microphone, wake_word):
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source)
+    print(f"Listening for wake word '{wake_word}'")
+    while True:
+        with microphone as source:
+            audio = recognizer.listen(source)
+        try:
+            speech_as_text = recognizer.recognize_google(audio).lower()
+            if wake_word in speech_as_text:
+                return True
+        except sr.UnknownValueError:
+            pass  # You can choose to print an error message here or just ignore
+
+def listen_and_transcribe(recognizer, microphone):
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source)
+        print("Wake word detected, start speaking...")
+        audio_data = recognizer.listen(source)
+    try:
+        return recognizer.recognize_google(audio_data)
+    except sr.UnknownValueError:
+        return "Google Cloud Speech could not understand audio"
+    except sr.RequestError as e:
+        return f"Could not request results from Google Cloud Speech service; {e}"
+
+# Use the microphone as source for input.
+if listen_for_wake_word(recognizer, mic, "open home"):
+    transcription = listen_and_transcribe(recognizer, mic)
+    print("Transcription:", transcription)
+
+
+
+
+
+text_to_speak = input("Enter the text you want to convert to speech: ")
+
+client = texttospeech.TextToSpeechClient()
+
+synthesis_input = texttospeech.SynthesisInput(text=text_to_speak)
+
+voice = texttospeech.VoiceSelectionParams(
+    language_code="en-US",
+    ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+)
+
+audio_config = texttospeech.AudioConfig(
+    audio_encoding=texttospeech.AudioEncoding.MP3
+)
+
+response = client.synthesize_speech(
+    input=synthesis_input,
+    voice=voice,
+    audio_config=audio_config
+)
+
+# Save the response to an MP3 file
+filename = "output.mp3"
+with open(filename, "wb") as out:
+    out.write(response.audio_content)
+    print("Audio content written to file 'output.mp3'")
+
+# Play the saved MP3 file
+playsound(filename)
