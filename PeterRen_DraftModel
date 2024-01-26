@@ -4,7 +4,7 @@ import speech_recognition as sr
 import simpleaudio as sa
 
 import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/users/yuxinren/openhome/my-google-cloud.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/yuxinren/OpenHomeProject/my-google-cloud.json"
 
 
 recognizer = sr.Recognizer()
